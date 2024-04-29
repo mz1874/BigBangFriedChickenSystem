@@ -3,6 +3,7 @@ from App.extension import init_extension
 from App.controllers.index_view import home_view
 from App.models.UserModel import UserModel
 from App.models.RoleModel import RoleModel
+from App.controllers.user_view import user_view
 
 
 def create_app():
@@ -13,6 +14,8 @@ def create_app():
     # db_url = "mysql+pymysql://root:v6%+nT8M@bugcreator.org.cn:3306/online_ordering_system?charset=utf8mb4"
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
     app.register_blueprint(home_view)
+    app.register_blueprint(user_view)
     init_extension(app)
     return app

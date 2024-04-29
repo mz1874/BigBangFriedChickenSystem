@@ -1,5 +1,6 @@
 from App import create_app
 from flask import jsonify, render_template, request
+from werkzeug.exceptions import MethodNotAllowed
 from functools import wraps
 
 app = create_app()
@@ -32,6 +33,10 @@ def handle_global_exception(error):
     }
     return jsonify(error_response), 500
 
+
+@app.errorhandler(MethodNotAllowed)
+def handle_method_not_allowed(error):
+    return jsonify({"error": "Method Not Allowed"}), 405  # 返回自定义的错误响应和状态码 405
 
 @app.route("/example")
 def example_route():
