@@ -1,3 +1,7 @@
+# 注意, 为确保运行环境一致,在启动当前的项目之前使用下面命令同步开发环境
+`pip install -r requirements.txt`
+
+
 ### 模型开始
 
 - pip install flask-sqlalchemy
