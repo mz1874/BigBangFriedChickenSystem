@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+
+from App.common.decorators import requires_permission
 from App.extension import db
 
 from App.common.CommonResponse import CommonResponse
@@ -14,10 +16,11 @@ def select_all_user():
     return jsonify(result)
 
 
+
+
 """
 查找当前系统的所有用户
 """
-
 
 @user_view.route('/addUser', methods=['POST'])
 def add_user():

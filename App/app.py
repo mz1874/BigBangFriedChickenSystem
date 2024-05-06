@@ -1,8 +1,10 @@
 from App import create_app
-from flask import jsonify, render_template, request
+from flask import jsonify, render_template, request,session
 from werkzeug.exceptions import MethodNotAllowed
 from functools import wraps
-
+from App.common.CommonResponse import CommonResponse
+from flask_login import current_user
+from App.common.decorators import requires_permission
 app = create_app()
 
 
@@ -24,15 +26,10 @@ def teardown_request(exception=None):
     if exception is not None:
         pass
 
-
 @app.errorhandler(Exception)
 def handle_global_exception(error):
-    error_response = {
-        "error": str(error),
-        "message": "An internal server error occurred"
-    }
-    return jsonify(error_response), 500
 
+    return jsonify(CommonResponse.failure(str(error), data=None, status_code=500))
 
 @app.errorhandler(MethodNotAllowed)
 def handle_method_not_allowed(error):
@@ -48,14 +45,6 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 
-# def requires_permission(permission):
-#     def decorator(func):
-#         @wraps(func)
-#         def wrapper(*args, **kwargs):
-#             return func(*args, **kwargs)
-#
-#         return wrapper
-#     return decorator
 
 
 if __name__ == '__main__':
