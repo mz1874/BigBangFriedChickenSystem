@@ -1,4 +1,3 @@
-from sqlalchemy.testing.pickleable import User
 from werkzeug.exceptions import NotFound
 from flask import Blueprint, jsonify, request, render_template, abort,session
 
