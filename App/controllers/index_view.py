@@ -25,13 +25,16 @@ def login():
         return jsonify(CommonResponse.failure("Could not find your userName", data=None, status_code=500))
     else:
         if password == user.password:
-            roles = user.roles
-            result = [role.role_name for role in roles]
+            user_roles = user.user_roles
+            result = [role.role_name for role in user_roles]
             session["role" + str(user.id)] = result
             login_user(user)
             json = {
                 "id":user.id,
-                "userName":user.username
+                "userName":user.username,
+                "role":result,
+                "sex":user.sex,
+                "addresss":user.address
             }
             return jsonify(CommonResponse.success("Login successful", data=json))
         return jsonify(CommonResponse.failure("Password error", data=None, status_code=500))

@@ -1,6 +1,9 @@
 from App.extension import db
 
 
+db_user_roles = db.Table('db_user_roles',
+                               db.Column('user_id', db.Integer, db.ForeignKey('tb_user.id'), primary_key=True),
+                               db.Column('role_id', db.Integer, db.ForeignKey('tb_role.id'), primary_key=True))
 class UserModel(db.Model):
     __tablename__ = 'tb_user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -10,7 +13,7 @@ class UserModel(db.Model):
     address = db.Column(db.String(100), nullable=False)
 
     # 一对多
-    roles = db.relationship('RoleModel', backref='user', lazy='dynamic')
+    user_roles = db.relationship("RoleModel", backref='users', lazy='dynamic', secondary=db_user_roles)
 
     def is_authenticated(self):
         return True

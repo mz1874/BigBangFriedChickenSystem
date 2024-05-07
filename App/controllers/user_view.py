@@ -3,6 +3,7 @@ from App.common.decorators import requires_permission
 from App.extension import db
 from App.common.common_response import CommonResponse
 from App.models.user_model import UserModel
+from App.models.role_model import RoleModel
 
 user_view = Blueprint('user_view', __name__)
 
@@ -74,6 +75,35 @@ def add_user():
         db.session.add(user)
         db.session.commit()
         return jsonify(CommonResponse.success(message="User added successfully")), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(message=str(e))), 500
+
+
+@user_view.route("/addRoleToUser", methods=["POST"])
+def add_roles_to_user():
+    request_data = request.get_json()
+    if not request_data:
+        return jsonify(CommonResponse.failure(message="Request data is empty")), 400
+    role_id = request_data.get("roleId")
+    user_id = request_data.get("userId")
+    if not user_id:
+        return jsonify(CommonResponse.failure(message="userId is empty")), 400
+    if not role_id:
+        return jsonify(CommonResponse.failure(message="roleId is empty")), 400
+    try:
+        role = RoleModel.query.filter_by(id=role_id).first()
+        if not role:
+            return jsonify(CommonResponse.failure(message="Could not find the role")), 400
+        current_user = UserModel.query.filter_by(id=user_id).first()
+
+        if not current_user:
+            return jsonify(CommonResponse.failure(message="Could not find the user")), 400
+
+        current_user.user_roles.append(role)  # 将角色添加到用户中
+        db.session.commit()
+        return jsonify(CommonResponse.success(message="Role added to user successfully")), 200
+
     except Exception as e:
         db.session.rollback()
         return jsonify(CommonResponse.failure(message=str(e))), 500
