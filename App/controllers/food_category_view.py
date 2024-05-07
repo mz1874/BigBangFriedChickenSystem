@@ -8,6 +8,11 @@ from App.models.food_category_model import FoodCategory
 
 food_category_view = Blueprint('food_category', __name__)
 
+@food_category_view.route("/foodCategory/list", methods=["GET"])
+def list_all_food_category():
+    query_result = FoodCategory.query.all()
+    result = [{"id":category.id, "categoryName":category.category_name} for category in query_result]
+    return jsonify(CommonResponse.success(result)), 200
 
 @food_category_view.route("/foodCategory/add", methods=["POST"])
 def add_food_category():
