@@ -13,7 +13,7 @@ def create_app():
     # 不要使用这个
     db_url = "mysql+pymysql://root:v6%+nT8M@192.168.0.60:3306/online_ordering_system?charset=utf8mb4"
     # 打开注释，使用服务器配置进行数据同步
-    # db_url = "mysql+pymysql://root:v6%+nT8M@bugcreator.org.cn:3306/online_ordering_system?charset=utf8mb4"
+    # db_url = "mysql+pymysql://root:v6%+nT8McT7zvn%@bugcreator.org.cn:3306/online_ordering_system?charset=utf8mb4"
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "v6%+nT8McT7z"

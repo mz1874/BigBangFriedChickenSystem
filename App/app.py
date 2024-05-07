@@ -24,7 +24,6 @@ def teardown_request(exception=None):
 
 @app.errorhandler(Exception)
 def handle_global_exception(error):
-
     return jsonify(CommonResponse.failure(str(error), data=None, status_code=500))
 
 @app.errorhandler(MethodNotAllowed)

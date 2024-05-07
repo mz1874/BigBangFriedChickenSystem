@@ -21,17 +21,20 @@ def login():
     username = request.json.get('username')
     password = request.json.get('password')
     user = UserModel.query.filter(UserModel.username == username).first()
-    roles = user.roles
-    result = [role.role_name for role in roles]
-    if not user:
-        return jsonify(CommonResponse.failure("Invalid username or password"))
+    if user is None:
+        return jsonify(CommonResponse.failure("Could not find your userName", data=None, status_code=500))
     else:
         if password == user.password:
+            roles = user.roles
+            result = [role.role_name for role in roles]
             session["role" + str(user.id)] = result
             login_user(user)
-            return jsonify(CommonResponse.success("Successfully logged in"))
-        return jsonify({'message': 'Invalid username or password'}), 401
-
+            json = {
+                "id":user.id,
+                "userName":user.username
+            }
+            return jsonify(CommonResponse.success("Login successful", data=json))
+        return jsonify(CommonResponse.failure("Password error", data=None, status_code=500))
     """
     User Login function 
     """
@@ -47,6 +50,8 @@ def dashboard():
 def logout():
     logout_user()
     return jsonify({'message': 'Logout successful'})
+
+
 """
 Logout function 
 """
@@ -61,6 +66,8 @@ def current_user_info():
         return jsonify({'user_id': user_id, 'roles': roles})
     else:
         return jsonify({'message': 'No user logged in'})
+
+
 """
 Testing access requires_permission admin
 """
