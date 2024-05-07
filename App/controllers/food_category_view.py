@@ -14,6 +14,25 @@ def list_all_food_category():
     result = [{"id":category.id, "categoryName":category.category_name} for category in query_result]
     return jsonify(CommonResponse.success(result)), 200
 
+
+@food_category_view.route("/foodCategory/getFoodsByCategoryId", methods=["GET"])
+def list_all_foods_in_category():
+    category_id = request.args.get("categoryId")
+    if not category_id:
+        return jsonify(CommonResponse.failure("categoryId is empty")), 400
+
+    food_category = FoodCategory.query.filter_by(id=category_id).first()
+    if not food_category:
+        return jsonify(CommonResponse.failure("Category not found")), 404
+
+    foods = food_category.foods
+    # 这里假设 foods 是一个列表，包含食物对象，您需要将其转换为可序列化的格式，比如字典列表
+    foods_list = [{"id": food.id, "name": food.food_name} for food in foods]
+
+    return jsonify(CommonResponse.success("Foods retrieved successfully", data=foods_list))
+
+
+
 @food_category_view.route("/foodCategory/add", methods=["POST"])
 def add_food_category():
     request_data = request.get_json()
