@@ -9,6 +9,7 @@ from App.models.authorization import AuthorizationModel
 from App.models.food_model import FoodModel
 from App.models.food_category_model import FoodCategory
 from App.controllers.food_category_view import food_category_view
+from App.controllers.food_view import food_view
 
 
 def create_app():
@@ -22,6 +23,7 @@ def create_app():
     app.config["SECRET_KEY"] = "v6%+nT8McT7z"
     app.register_blueprint(food_category_view)
     app.register_blueprint(home_view)
+    app.register_blueprint(food_view)
     app.register_blueprint(user_view)
     login_manager.init_app(app)
     init_extension(app)
