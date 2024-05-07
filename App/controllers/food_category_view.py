@@ -50,3 +50,27 @@ def delete_food_category():
             db.session.flush()
     else:
         return jsonify(CommonResponse.failure("Could not find this food category")), 400
+
+
+
+@food_category_view.route("/foodCategory/update", methods=["POST"])
+def update_food_category():
+    request_data = request.get_json()
+    if not request_data:
+        return jsonify(CommonResponse.failure("Request body is empty")), 400
+    category_id = request_data.get("categoryId")
+    category_name = request_data.get("categoryName")
+    if category_id is None or category_name is None:
+        return jsonify(CommonResponse.failure("categoryId or categoryName is empty")), 400
+    food_category = FoodCategory.query.filter_by(id=category_id).first()
+    if food_category is not None :
+        try:
+            food_category.category_name = category_name
+            db.session.commit()
+            return jsonify(CommonResponse.success("category update successful!"))
+        except Exception as e:
+            db.session.rollback()
+            db.session.flush()
+    else:
+        return jsonify(CommonResponse.failure("Could not find this food category")), 400
+
