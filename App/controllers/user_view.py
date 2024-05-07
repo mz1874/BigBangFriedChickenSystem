@@ -3,8 +3,8 @@ from flask import Blueprint, jsonify, request
 from App.common.decorators import requires_permission
 from App.extension import db
 
-from App.common.CommonResponse import CommonResponse
-from App.models.UserModel import UserModel
+from App.common.common_response import CommonResponse
+from App.models.user_model import UserModel
 
 user_view = Blueprint('user_view', __name__)
 

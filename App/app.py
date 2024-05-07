@@ -1,10 +1,7 @@
 from App import create_app
-from flask import jsonify, render_template, request,session
+from flask import jsonify, render_template, request
 from werkzeug.exceptions import MethodNotAllowed
-from functools import wraps
-from App.common.CommonResponse import CommonResponse
-from flask_login import current_user
-from App.common.decorators import requires_permission
+from App.common.common_response import CommonResponse
 app = create_app()
 
 
@@ -12,7 +9,6 @@ app = create_app()
 def before_request():
     if not request.path.startswith('/static/'):
         pass
-
 
 @app.after_request
 def after_request(response):

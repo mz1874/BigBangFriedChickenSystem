@@ -23,3 +23,7 @@ def requires_permission(permission):
         return wrapper
 
     return decorator
+
+"""
+Decorator that check the permisssion
+"""

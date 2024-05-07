@@ -2,10 +2,10 @@ from flask import Flask
 from App.extension import init_extension
 from App.extension import login_manager
 from App.controllers.index_view import home_view
-from App.models.UserModel import UserModel
-from App.models.RoleModel import RoleModel
+from App.models.user_model import UserModel
+from App.models.role_model import RoleModel
 from App.controllers.user_view import user_view
-from App.models.Authorization import AuthorizationModel
+from App.models.authorization import AuthorizationModel
 
 
 def create_app():
