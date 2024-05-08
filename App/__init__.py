@@ -12,6 +12,7 @@ from App.controllers.food_category_view import food_category_view
 from App.controllers.food_view import food_view
 
 
+
 def create_app():
     app = Flask(__name__)
     # 不要使用这个
