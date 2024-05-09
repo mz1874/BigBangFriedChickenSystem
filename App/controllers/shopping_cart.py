@@ -1,22 +1,16 @@
-from flask import Blueprint, jsonify, request, session
-from App.common.decorators import requires_permission
+from flask import Blueprint, request
 from App.extension import db
 from App.common.common_response import CommonResponse
-from App.models.user_model import UserModel
-from App.models.role_model import RoleModel
-from App.models.food_category_model import FoodCategory
 from flask_login import current_user
-from sqlalchemy import func
 from App.models.shopping_cart_model import ShoppingCart, db_shopping_cart_foods
 from App.models.shopping_DTO import ShoppingDTO
+from flask import jsonify
+from App.models.food_model import FoodModel
 
 shopping_cart_view = Blueprint('shopping_cart', __name__)
 
-from flask import jsonify
-from sqlalchemy import func
 
-
-@shopping_cart_view.route("/shopping_cart", methods=['GET'])
+@shopping_cart_view.route("/shoppingCart/select", methods=['GET'])
 def show_shopping_cart():
     user = current_user
     cart = ShoppingCart.query.filter_by(user_id=user.id).first()
@@ -43,3 +37,30 @@ def show_shopping_cart():
 
     # Return the list of dictionaries directly
     return jsonify(CommonResponse.success(shopping_dto_list))
+
+
+@shopping_cart_view.route("/shoppingCart/delete", methods=['POST'])
+def delete_item_on_shopping_cart():
+    cart = ShoppingCart.query.filter_by(user_id=current_user.id).first()
+
+    if not cart:
+        return jsonify(CommonResponse.failure("could not find cart")), 404
+
+    food_id_to_delete = request.json.get('foodId')
+
+    if not food_id_to_delete:
+        return jsonify(CommonResponse.failure("required food id")), 400
+
+    food_to_delete = FoodModel.query.get(food_id_to_delete)
+
+    if not food_to_delete:
+        return jsonify(CommonResponse.failure("Could not find the food")), 404
+
+    try:
+        # 从购物车中移除食物
+        cart.foods.remove(food_to_delete)
+        db.session.commit()
+        return jsonify(CommonResponse.success("delete successful")), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(message=str(e))), 500
