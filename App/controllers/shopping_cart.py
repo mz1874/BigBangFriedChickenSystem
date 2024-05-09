@@ -64,3 +64,31 @@ def delete_item_on_shopping_cart():
     except Exception as e:
         db.session.rollback()
         return jsonify(CommonResponse.failure(message=str(e))), 500
+
+
+@shopping_cart_view.route("/shoppingCart/add", methods=['POST'])
+def add_item_to_shopping_cart():
+
+    cart = ShoppingCart.query.filter_by(user_id=current_user.id).first()
+
+    if not cart:
+        return jsonify(CommonResponse.failure("Could not find cart")), 404
+
+    food_id_to_add = request.json.get('foodId')
+
+    if not food_id_to_add:
+        return jsonify(CommonResponse.failure("Required food ID")), 400
+
+    food_to_add = FoodModel.query.get(food_id_to_add)
+
+    if not food_to_add:
+        return jsonify(CommonResponse.failure("Could not find the food")), 404
+
+    try:
+        # 添加食物到购物车
+        cart.foods.append(food_to_add)
+        db.session.commit()
+        return jsonify(CommonResponse.success("Item added to cart")), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(message=str(e))), 500
