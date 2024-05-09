@@ -11,7 +11,7 @@ from App.models.food_category_model import FoodCategory
 from App.controllers.food_category_view import food_category_view
 from App.controllers.food_view import food_view
 from App.models.order_model import OrderModel
-
+from App.models.shopping_cart_model import ShoppingCart
 
 def create_app():
     app = Flask(__name__)
