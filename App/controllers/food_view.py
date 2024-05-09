@@ -67,9 +67,52 @@ def food_image_upload():
 
 @food_view.route("/food/delete", methods=["POST"])
 def food_delete():
-    pass
+    request_data = request.get_json()
+    if request_data is not None:
+        id = request_data.get("foodId")
+        if id is None:
+            CommonResponse.failure("foodId is empty", 400)
+        else:
+            try:
+                food = FoodModel.query.filter_by(id=id).first()
+                if food is not None:
+                    db.session.delete(food)
+                    db.session.commit()
+                else:
+                    return CommonResponse.failure("Food id is invalid", 400)
+            except Exception as e:
+                db.session.rollback()
+                db.session.flush()
+                return jsonify(CommonResponse.failure(message=str(e))), 500
+    else:
+        return CommonResponse.failure("Request body is empty", 400)
 
 
 @food_view.route("/food/update", methods=["POST"])
 def food_update():
-    pass
+    request_data = request.get_json()
+    if request_data is not None:
+        food_id = request_data.get("foodId")
+        if food_id is None:
+            return CommonResponse.failure("foodId is empty", 400)
+        else:
+            existed_food = FoodModel.query.filter_by(id=food_id).first()
+            if existed_food is not None:
+                current_food = FoodModel()
+                current_food.id = food_id
+                current_food.food_name = request_data.get("food_name")
+                current_food.price = request_data.get("price")
+                current_food.food_category = existed_food.food_category
+                try:
+                    db.session.add(current_food)
+                    db.session.commit()
+                    return CommonResponse.success("Added food successfully")
+                except Exception as e:
+                    db.session.rollback()
+                    db.session.flush()
+                    return jsonify(CommonResponse.failure(message=str(e))), 500
+            else:
+                return CommonResponse.failure("foodId is invalid", 400)
+
+    else:
+        return CommonResponse.failure("Request body is empty", 400)
