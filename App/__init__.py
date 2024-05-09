@@ -10,7 +10,7 @@ from App.models.food_model import FoodModel
 from App.models.food_category_model import FoodCategory
 from App.controllers.food_category_view import food_category_view
 from App.controllers.food_view import food_view
-
+from App.models.order_model import OrderModel
 
 
 def create_app():
