@@ -14,6 +14,14 @@ order_view = Blueprint('order_view', __name__)
 @order_view.route("/order/selectOrderByUserId", methods=["GET"])
 def selectOrder():
     user_id = current_user.id
-    user = UserModel.query.filter_by(id = user_id).first()
+    user = UserModel.query.filter_by(id=user_id).first()
     if user is not None:
-        orders = user.user_orders
+        orders = user.orders
+        if orders is not None:
+            result = [{"id": order.id, "orderTime": order.order_time, "total": order.total, "status": order.status} for
+                      order in orders]
+            return CommonResponse.success(result)
+        else:
+            return CommonResponse.success()
+    else:
+        CommonResponse.failure("User not found")

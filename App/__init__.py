@@ -13,7 +13,7 @@ from App.controllers.shopping_cart import shopping_cart_view
 from App.controllers.food_view import food_view
 from App.models.order_model import OrderModel
 from App.models.shopping_cart_model import ShoppingCart
-
+from App.controllers.order_view import order_view
 def create_app():
     app = Flask(__name__)
     # 不要使用这个
@@ -26,6 +26,7 @@ def create_app():
     app.register_blueprint(food_category_view)
     app.register_blueprint(home_view)
     app.register_blueprint(shopping_cart_view)
+    app.register_blueprint(order_view)
     app.register_blueprint(user_view)
     login_manager.init_app(app)
     init_extension(app)
