@@ -11,4 +11,5 @@ class OrderModel(db.Model):
     order_time = db.Column(db.DateTime, default=datetime.utcnow)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'), nullable=False)
     order_foods = db.relationship("FoodModel", backref='order', lazy='dynamic', secondary=db_order_foods)

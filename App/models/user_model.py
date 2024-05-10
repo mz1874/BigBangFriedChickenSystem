@@ -17,7 +17,8 @@ class UserModel(db.Model):
     sex = db.Column(db.Boolean, nullable=True)
     address = db.Column(db.String(100), nullable=False)
     user_roles = db.relationship("RoleModel", backref='users', lazy='dynamic', secondary=db_user_roles)
-    user_orders = db.relationship("OrderModel", backref='user', lazy='dynamic', secondary=db_user_order)
+    # 一对多
+    orders  = db.relationship('OrderModel', backref='user', lazy=True)
     shopping_cart = db.relationship('ShoppingCart', backref='user', uselist=False)
 
     def is_authenticated(self):
