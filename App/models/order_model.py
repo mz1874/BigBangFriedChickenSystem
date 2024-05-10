@@ -4,7 +4,8 @@ from App.extension import db
 
 db_order_foods = db.Table('db_order_foods',
                                db.Column('order_id', db.Integer, db.ForeignKey('tb_order.id'), primary_key=True),
-                               db.Column('food_id', db.Integer, db.ForeignKey('tb_food.id'), primary_key=True))
+                               db.Column('food_id', db.Integer, db.ForeignKey('tb_food.id'), primary_key=True),
+                               db.Column('quality', db.Integer))
 class OrderModel(db.Model):
     __tablename__ = 'tb_order'
     id = db.Column(db.Integer, primary_key=True)
