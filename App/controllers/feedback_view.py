@@ -1,21 +1,17 @@
 from flask import Blueprint, jsonify, request
-from App.common.decorators import requires_permission
+from App.common.common_response import CommonResponse
 from App.extension import db
 from App.models.feedback_model import FeedbackModel
-from App.common.common_response import CommonResponse
-from App.models.user_model import UserModel
-from App.models.role_model import RoleModel
-from App.models.food_category_model import FoodCategory
 
 feedback_view = Blueprint('feedback', __name__)
 
 
-@feedback_view.route("/feedback/page", method =["GET"])
+@feedback_view.route("/feedback/page", methods=["GET"])
 def feedback_page():
     pass;
 
 
-@feedback_view.route("/feedback/add", method =["POST"])
+@feedback_view.route("/feedback/add", methods=["POST"])
 def addFeedback():
     request_data = request.get_json()
     if not request_data:
@@ -28,9 +24,10 @@ def addFeedback():
     date_visit = request_data.get("dataVisit")
     subject = request_data.get("subject")
     message = request_data.get("message")
-    if not all([name, email, category, visit_type, time_visit, date_visit,subject, message]):
+    if not all([name, email, category, visit_type, time_visit, date_visit, subject, message]):
         return CommonResponse.failure("All fields are required")
-    feed_back = FeedbackModel(name = name, email=email, category = category, visit_type = visit_type, time_visit=time_visit,date_visit=date_visit,subject=subject,message=message)
+    feed_back = FeedbackModel(name=name, email=email, category=category, visit_type=visit_type, time_visit=time_visit,
+                              date_visit=date_visit, subject=subject, message=message)
     try:
         db.session.add(feed_back)
         db.session.commit()
@@ -41,7 +38,6 @@ def addFeedback():
         return jsonify(CommonResponse.failure(message=str(e))), 500
 
 
-
-@feedback_view.route("/feedback/delete", method =["POST"])
+@feedback_view.route("/feedback/delete", methods=["POST"])
 def deleteFeedback():
     pass
