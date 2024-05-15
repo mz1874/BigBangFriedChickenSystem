@@ -4,6 +4,7 @@ from App.extension import login_manager
 from App.controllers.index_view import home_view
 from App.models.user_model import UserModel
 from App.models.role_model import RoleModel
+from App.models.feedback_model import FeedbackModel
 from App.controllers.user_view import user_view
 from App.models.authorization import AuthorizationModel
 from App.models.food_model import FoodModel
