@@ -6,6 +6,7 @@ from App.models.user_model import UserModel
 from App.models.role_model import RoleModel
 from App.models.feedback_model import FeedbackModel
 from App.controllers.user_view import user_view
+from App.controllers.feedback_view import feedback_page
 from App.models.authorization import AuthorizationModel
 from App.models.food_model import FoodModel
 from App.models.food_category_model import FoodCategory
@@ -25,6 +26,7 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "v6%+nT8McT7z"
     app.register_blueprint(food_category_view)
+    app.register_blueprint(feedback_page)
     app.register_blueprint(home_view)
     app.register_blueprint(shopping_cart_view)
     app.register_blueprint(order_view)
