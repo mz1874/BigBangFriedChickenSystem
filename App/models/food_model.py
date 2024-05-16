@@ -7,4 +7,5 @@ class FoodModel(db.Model):
     food_name = db.Column(db.String(50), nullable=False, unique=True)
     price = db.Column(db.Float, nullable=True)
     img = db.Column(db.String(100), nullable=False, unique=True)
+    info = db.Column(db.String(200), nullable=False, unique=True)
     category_id = db.Column(db.Integer, db.ForeignKey('tb_category.id'), nullable=False)

@@ -26,6 +26,7 @@ def create_app(config_name):
     app.register_blueprint(shopping_cart_view)
     app.register_blueprint(order_view)
     app.register_blueprint(user_view)
+    app.register_blueprint(food_view)
 
     login_manager.init_app(app)
     init_extension(app)

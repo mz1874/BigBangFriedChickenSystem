@@ -27,7 +27,8 @@ def food_add():
         src = request_data.get("src")
         food_category_id = request_data.get("foodCategoryId")
         price = request_data.get("price")
-        if not all([food_name, src, food_category_id, price]):
+        info = request_data.get("info")
+        if not all([food_name, src, food_category_id, price,info]):
             return CommonResponse.failure("All fields are required")
         else:
             category = FoodCategory.query.filter_by(id=food_category_id).first()
@@ -37,6 +38,7 @@ def food_add():
                 food.food_category = category
                 food.price = price
                 food.img = src
+                food.info = info
                 try:
                     db.session.add(food)
                     db.session.commit()
@@ -78,6 +80,7 @@ def food_delete():
                 if food is not None:
                     db.session.delete(food)
                     db.session.commit()
+                    return CommonResponse.success("Food has been deleted", 200)
                 else:
                     return CommonResponse.failure("Food id is invalid", 400)
             except Exception as e:
@@ -93,26 +96,28 @@ def food_update():
     request_data = request.get_json()
     if request_data is not None:
         food_id = request_data.get("foodId")
-        if food_id is None:
-            return CommonResponse.failure("foodId is empty", 400)
+        food_name = request_data.get("foodName")
+        price = request_data.get("price")
+        info = request_data.get("info")
+        src = request_data.get("src")
+        category = request_data.get("category")
+        if not all([food_id, food_name, price, info, category]):
+            return jsonify(CommonResponse("All files are required", 400))
+        existed_food = FoodModel.query.get(food_id)
+        new_category = FoodCategory.query.filter_by(id=category).first()
+        if existed_food and new_category:
+            existed_food.food_name = food_name
+            existed_food.price = price
+            existed_food.info = info
+            existed_food.category_id = new_category.id
+            existed_food.img = src
+            try:
+                db.session.commit()
+                return jsonify(CommonResponse.success("Updated food successfully"))
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(CommonResponse.failure(message=str(e))), 500
         else:
-            existed_food = FoodModel.query.filter_by(id=food_id).first()
-            if existed_food is not None:
-                current_food = FoodModel()
-                current_food.id = food_id
-                current_food.food_name = request_data.get("food_name")
-                current_food.price = request_data.get("price")
-                current_food.food_category = existed_food.food_category
-                try:
-                    db.session.add(current_food)
-                    db.session.commit()
-                    return CommonResponse.success("Added food successfully")
-                except Exception as e:
-                    db.session.rollback()
-                    db.session.flush()
-                    return jsonify(CommonResponse.failure(message=str(e))), 500
-            else:
-                return CommonResponse.failure("foodId is invalid", 400)
-
+            return jsonify(CommonResponse.failure("Food not found", 404))
     else:
-        return CommonResponse.failure("Request body is empty", 400)
+        return jsonify(CommonResponse.failure("Request body is empty", 400))

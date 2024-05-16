@@ -42,7 +42,7 @@ def list_all_foods_in_category():
 
     foods = food_category.foods
     # 这里假设 foods 是一个列表，包含食物对象，您需要将其转换为可序列化的格式，比如字典列表
-    foods_list = [{"id": food.id, "name": food.food_name} for food in foods]
+    foods_list = [{"id": food.id, "name": food.food_name, "img": food.img, "info": food.info, "price":food.price} for food in foods]
 
     return jsonify(CommonResponse.success("Foods retrieved successfully", data=foods_list))
 
@@ -102,6 +102,7 @@ def update_food_category():
     if category_id is None or category_name is None:
         return jsonify(CommonResponse.failure("categoryId or categoryName is empty")), 400
     food_category = FoodCategory.query.filter_by(id=category_id).first()
+    uf
     if food_category is not None :
         try:
             food_category.category_name = category_name
