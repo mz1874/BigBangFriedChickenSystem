@@ -8,7 +8,35 @@ feedback_view = Blueprint('feedback', __name__)
 
 @feedback_view.route("/feedback/page", methods=["GET"])
 def feedback_page():
-    pass;
+    page = request.args.get("page", 1, type=int)
+    count = request.args.get("count", 20, type=int)
+    feedbacks_paginated = FeedbackModel.query.paginate(page=page, per_page=count, max_per_page=100, error_out=False)
+
+    if feedbacks_paginated.items:
+        result = [{"id": feedback.id, "name": feedback.name, "email": feedback.email, "category": feedback.category,
+                   "visitType": feedback.visit_type, "timeVisit": feedback.time_visit, "dateVisit": feedback.date_visit,
+                   "subject": feedback.subject, "message": feedback.message} for feedback in feedbacks_paginated.items]
+
+        response = {
+            "feedbacks": result,
+            "pagination": {
+                "page": feedbacks_paginated.page,
+                "per_page": feedbacks_paginated.per_page,
+                "total_pages": feedbacks_paginated.pages,
+                "total_items": feedbacks_paginated.total
+            }
+        }
+        return jsonify(CommonResponse.success(response))
+    else:
+        return jsonify(CommonResponse.success({
+            "feedbacks": [],
+            "pagination": {
+                "page": page,
+                "per_page": count,
+                "total_pages": 0,
+                "total_items": 0
+            }
+        }))
 
 
 @feedback_view.route("/feedback/add", methods=["POST"])
