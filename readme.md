@@ -11,3 +11,4 @@
 - 迁移 `flask db migrate`
 - 更新 `flask db upgrade`
 - 降级 `flask db downgrade`
+- nohup gunicorn -w 4 -b 0.0.0.0:5000 App.app:app &

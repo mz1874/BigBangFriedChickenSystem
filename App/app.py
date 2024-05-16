@@ -2,7 +2,10 @@ from App import create_app
 from flask import jsonify, render_template, request
 from werkzeug.exceptions import MethodNotAllowed
 from App.common.common_response import CommonResponse
-app = create_app()
+
+
+# app = create_app("development")
+app = create_app("production")
 
 
 @app.before_request
