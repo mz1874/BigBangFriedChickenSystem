@@ -66,18 +66,25 @@ def add_user():
         return jsonify(CommonResponse.failure(message="Request data is empty")), 400
     username = request_data.get('username')
     password = request_data.get('password')
+    role_id = request_data.get('role')
     sex = request_data.get('sex')
     address = request_data.get('address')
-    if not all([username, password, sex, address]):
+    if not all([username, password, sex, address, role_id]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
-    try:
-        user = UserModel(username=username, password=password, sex=sex, address=address)
-        db.session.add(user)
-        db.session.commit()
-        return jsonify(CommonResponse.success(message="User added successfully")), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(CommonResponse.failure(message=str(e))), 500
+    else:
+        role = RoleModel.query.filter_by(id =role_id).first()
+        if role.role_name == "admin":
+            return jsonify(CommonResponse.failure("Invalid role_id"))
+        else:
+            try:
+                user = UserModel(username=username, password=password, sex=sex, address=address)
+                user.user_roles.add(role)
+                db.session.add(user)
+                db.session.commit()
+                return jsonify(CommonResponse.success(message="User added successfully")), 200
+            except Exception as e:
+                db.session.rollback()
+                return jsonify(CommonResponse.failure(message=str(e))), 500
 
 
 @user_view.route("/addRoleToUser", methods=["POST"])

@@ -11,7 +11,7 @@ cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 
 def init_extension(app):
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}})
     db.init_app(app=app)
     cache.init_app(app=app)
     migrate.init_app(app=app, db=db)

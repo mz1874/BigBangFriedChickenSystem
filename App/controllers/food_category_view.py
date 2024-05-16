@@ -10,10 +10,25 @@ food_category_view = Blueprint('food_category', __name__)
 
 @food_category_view.route("/foodCategory/list", methods=["GET"])
 def list_all_food_category():
-    query_result = FoodCategory.query.all()
-    result = [{"id":category.id, "categoryName":category.category_name} for category in query_result]
-    return jsonify(CommonResponse.success(result)), 200
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('count', 10, type=int)
+    # 分页查询
+    pagination = FoodCategory.query.paginate(page=page, per_page=per_page)
 
+    # 构造返回结果
+    categories = pagination.items
+    result = [{"id": category.id, "categoryName": category.category_name} for category in categories]
+
+    return jsonify(CommonResponse.success({
+        "items": result,
+        "total": pagination.total,
+        "page": pagination.page,
+        "pages": pagination.pages,
+        "has_prev": pagination.has_prev,
+        "has_next": pagination.has_next,
+        "prev_num": pagination.prev_num,
+        "next_num": pagination.next_num
+    })), 200
 
 @food_category_view.route("/foodCategory/getFoodsByCategoryId", methods=["GET"])
 def list_all_foods_in_category():
@@ -68,7 +83,7 @@ def delete_food_category():
         try:
             db.session.delete(food_category)
             db.session.commit()
-            return
+            return CommonResponse.success("Category has been deleted successfully"), 200
         except Exception as e:
             db.session.rollback()
             db.session.flush()
