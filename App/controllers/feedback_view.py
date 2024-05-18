@@ -15,18 +15,18 @@ def feedback_page():
     if feedbacks_paginated.items:
         result = [{"id": feedback.id, "name": feedback.name, "email": feedback.email, "category": feedback.category,
                    "visitType": feedback.visit_type, "timeVisit": feedback.time_visit, "dateVisit": feedback.date_visit,
-                   "subject": feedback.subject, "message": feedback.message} for feedback in feedbacks_paginated.items]
+                   "subject": feedback.subject, "message": feedback.message, "tel": feedback.tel} for feedback in feedbacks_paginated.items]
 
-        response = {
-            "feedbacks": result,
-            "pagination": {
-                "page": feedbacks_paginated.page,
-                "per_page": feedbacks_paginated.per_page,
-                "total_pages": feedbacks_paginated.pages,
-                "total_items": feedbacks_paginated.total
-            }
-        }
-        return jsonify(CommonResponse.success(response))
+        return jsonify(CommonResponse.success({
+            "items": result,
+            "total": feedbacks_paginated.total,
+            "page": feedbacks_paginated.page,
+            "pages": feedbacks_paginated.pages,
+            "has_prev": feedbacks_paginated.has_prev,
+            "has_next": feedbacks_paginated.has_next,
+            "prev_num": feedbacks_paginated.prev_num,
+            "next_num": feedbacks_paginated.next_num
+        })), 200
     else:
         return jsonify(CommonResponse.success({
             "feedbacks": [],
@@ -52,10 +52,11 @@ def addFeedback():
     date_visit = request_data.get("dataVisit")
     subject = request_data.get("subject")
     message = request_data.get("message")
-    if not all([name, email, category, visit_type, time_visit, date_visit, subject, message]):
+    tel = request_data.get("tel")
+    if not all([name, email, category, visit_type, time_visit, date_visit, subject, message, tel]):
         return CommonResponse.failure("All fields are required")
     feed_back = FeedbackModel(name=name, email=email, category=category, visit_type=visit_type, time_visit=time_visit,
-                              date_visit=date_visit, subject=subject, message=message)
+                              date_visit=date_visit, subject=subject, message=message,tel = tel)
     try:
         db.session.add(feed_back)
         db.session.commit()

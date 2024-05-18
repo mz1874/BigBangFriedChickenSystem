@@ -4,6 +4,7 @@ from App.extension import db
 from App.common.common_response import CommonResponse
 from App.models.user_model import UserModel
 from App.models.role_model import RoleModel
+from App.models.shopping_cart_model import ShoppingCart
 
 user_view = Blueprint('user_view', __name__)
 
@@ -77,7 +78,8 @@ def add_user():
             return jsonify(CommonResponse.failure("Invalid role_id"))
         else:
             try:
-                user = UserModel(username=username, password=password, sex=sex, address=address)
+                cart = ShoppingCart()
+                user = UserModel(username=username, password=password, sex=sex, address=address, shopping_cart = cart)
                 user.user_roles.add(role)
                 db.session.add(user)
                 db.session.commit()

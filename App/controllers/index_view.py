@@ -52,7 +52,7 @@ def dashboard():
 @home_view.route('/logout', methods=['POST'])
 def logout():
     logout_user()
-    return jsonify({'message': 'Logout successful'})
+    return jsonify(CommonResponse.success("logout successful"))
 
 
 """

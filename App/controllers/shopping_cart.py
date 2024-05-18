@@ -1,11 +1,16 @@
 from flask import Blueprint, request
+from sqlalchemy import select, update, func
+
 from App.extension import db
 from App.common.common_response import CommonResponse
 from flask_login import current_user
-from App.models.shopping_cart_model import ShoppingCart, db_shopping_cart_foods
+from App.models.shopping_cart_model import ShoppingCart
 from App.models.shopping_DTO import ShoppingDTO
 from flask import jsonify
 from App.models.food_model import FoodModel
+from App.models.shopping_cart_model import db_shopping_cart_foods
+from datetime import datetime
+
 
 shopping_cart_view = Blueprint('shopping_cart', __name__)
 
@@ -68,13 +73,13 @@ def delete_item_on_shopping_cart():
 
 @shopping_cart_view.route("/shoppingCart/add", methods=['POST'])
 def add_item_to_shopping_cart():
-
     cart = ShoppingCart.query.filter_by(user_id=current_user.id).first()
 
     if not cart:
         return jsonify(CommonResponse.failure("Could not find cart")), 404
 
     food_id_to_add = request.json.get('foodId')
+    quality = request.json.get('quality', 1)  # 默认质量为1
 
     if not food_id_to_add:
         return jsonify(CommonResponse.failure("Required food ID")), 400
@@ -84,11 +89,56 @@ def add_item_to_shopping_cart():
     if not food_to_add:
         return jsonify(CommonResponse.failure("Could not find the food")), 404
 
-    try:
-        # 添加食物到购物车
-        cart.foods.append(food_to_add)
-        db.session.commit()
-        return jsonify(CommonResponse.success("Item added to cart")), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify(CommonResponse.failure(message=str(e))), 500
+    # 检查是否已经存在于购物车中
+    stmt = select(db_shopping_cart_foods).where(
+        db_shopping_cart_foods.c.shopping_cart_id == cart.id,
+        db_shopping_cart_foods.c.food_id == food_to_add.id
+    )
+    result = db.session.execute(stmt).fetchone()
+
+    if result:
+        # 确保 result.quality 是整数
+        current_quality = result.quality or 0
+        # 更新现有记录的数量
+        update_stmt = (
+            update(db_shopping_cart_foods).
+            where(
+                db_shopping_cart_foods.c.shopping_cart_id == cart.id,
+                db_shopping_cart_foods.c.food_id == food_to_add.id
+            ).
+            values(quality=current_quality + quality)
+        )
+        try:
+            db.session.execute(update_stmt)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify(CommonResponse.failure(message=str(e))), 500
+    else:
+        # 添加新记录
+        new_record = {
+            'shopping_cart_id': cart.id,
+            'food_id': food_to_add.id,
+            'quality': quality,
+            'created_at': datetime.utcnow()
+        }
+        try:
+            insert_stmt = db_shopping_cart_foods.insert().values(**new_record)
+            db.session.execute(insert_stmt)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return jsonify(CommonResponse.failure(message=str(e))), 500
+
+    # 计算总价
+    total_price_stmt = db.session.query(
+        func.sum(FoodModel.price * db_shopping_cart_foods.c.quality)
+    ).join(
+        db_shopping_cart_foods, FoodModel.id == db_shopping_cart_foods.c.food_id
+    ).filter(
+        db_shopping_cart_foods.c.shopping_cart_id == cart.id
+    )
+
+    total_price = db.session.execute(total_price_stmt).scalar()
+
+    return jsonify(CommonResponse.success("Item added/updated in cart", data={"total_price": total_price})), 200
