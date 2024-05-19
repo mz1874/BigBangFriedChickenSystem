@@ -91,6 +91,27 @@ def food_delete():
         return CommonResponse.failure("Request body is empty", 400)
 
 
+@food_view.route("/food/query", methods=["GET"])
+def food_query():
+    food_id = request.args.get("foodId")
+    if food_id is None:
+        return CommonResponse.failure("Food ID is required", 400)
+
+    food = FoodModel.query.get(food_id)
+    if food is not None:
+        data = {
+            "foodId": food.id,
+            "foodName": food.food_name,
+            "src": food.img,
+            "foodCategoryId": food.food_category.id,
+            "price": food.price,
+            "info": food.info
+        }
+        return CommonResponse.success(data)
+    else:
+        return CommonResponse.failure("Food not found", 404)
+
+
 @food_view.route("/food/update", methods=["POST"])
 def food_update():
     request_data = request.get_json()
