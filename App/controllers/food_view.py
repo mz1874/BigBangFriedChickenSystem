@@ -16,7 +16,44 @@ def allowed_file(filename):
 
 @food_view.route("/food/page", methods=["GET"])
 def page():
-    pass
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('count', 20, type=int)
+    food_category_id = request.args.get('foodCategoryId', type=int)
+    food_name = request.args.get('foodName', type=str)
+
+    query = FoodModel.query
+
+    if food_category_id:
+        query = query.filter(FoodModel.category_id == food_category_id)
+
+    if food_name:
+        query = query.filter(FoodModel.food_name.ilike(f"%{food_name}%"))
+
+    food_query = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    items = [
+        {
+            "foodId": food.id,
+            "foodName": food.food_name,
+            "src": food.img,
+            "foodCategoryId": food.food_category.id,
+            "price": food.price,
+            "info": food.info
+        }
+        for food in food_query.items
+    ]
+
+    data = {
+        "items": items,
+        "total": food_query.total,
+        "page": food_query.page,
+        "pages": food_query.pages,
+        "has_prev":food_query.has_prev,
+        "has_next":food_query.has_next,
+        "prev_num":food_query.prev_num,
+        "next_num":food_query.next_num
+    }
+    return CommonResponse.success(data)
 
 
 @food_view.route("/food/add", methods=["POST"])

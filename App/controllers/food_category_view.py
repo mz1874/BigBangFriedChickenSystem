@@ -8,6 +8,21 @@ from App.models.food_category_model import FoodCategory
 
 food_category_view = Blueprint('food_category', __name__)
 
+
+@food_category_view.route("/foodCategory", methods=['GET'])
+def get_food_category_by_id():
+    category_id = request.args.get('category_id')
+    if category_id is None:
+        return jsonify(CommonResponse.failure("category_id is required"))
+    else:
+        result = FoodCategory.query.filter_by(id=category_id).first()
+        data_to_return = {
+            'id': result.id,
+            "categoryName":result.category_name
+        }
+        return jsonify(CommonResponse.success(data_to_return))
+
+
 @food_category_view.route("/foodCategory/list", methods=["GET"])
 def list_all_food_category():
     page = request.args.get('page', 1, type=int)
@@ -30,6 +45,7 @@ def list_all_food_category():
         "next_num": pagination.next_num
     })), 200
 
+
 @food_category_view.route("/foodCategory/getFoodsByCategoryId", methods=["GET"])
 def list_all_foods_in_category():
     category_id = request.args.get("categoryId")
@@ -42,10 +58,10 @@ def list_all_foods_in_category():
 
     foods = food_category.foods
     # 这里假设 foods 是一个列表，包含食物对象，您需要将其转换为可序列化的格式，比如字典列表
-    foods_list = [{"id": food.id, "name": food.food_name, "img": food.img, "info": food.info, "price":food.price} for food in foods]
+    foods_list = [{"id": food.id, "name": food.food_name, "img": food.img, "info": food.info, "price": food.price} for
+                  food in foods]
 
     return jsonify(CommonResponse.success("Foods retrieved successfully", data=foods_list))
-
 
 
 @food_category_view.route("/foodCategory/add", methods=["POST"])
@@ -79,7 +95,7 @@ def delete_food_category():
     if not category_id:
         return jsonify(CommonResponse.failure("categoryId is empty")), 400
     food_category = FoodCategory.query.filter_by(id=category_id).first()
-    if food_category is not None :
+    if food_category is not None:
         try:
             db.session.delete(food_category)
             db.session.commit()
@@ -89,7 +105,6 @@ def delete_food_category():
             db.session.flush()
     else:
         return jsonify(CommonResponse.failure("Could not find this food category")), 400
-
 
 
 @food_category_view.route("/foodCategory/update", methods=["POST"])
@@ -103,7 +118,7 @@ def update_food_category():
         return jsonify(CommonResponse.failure("categoryId or categoryName is empty")), 400
     food_category = FoodCategory.query.filter_by(id=category_id).first()
 
-    if food_category is not None :
+    if food_category is not None:
         try:
             food_category.category_name = category_name
             db.session.commit()
@@ -113,4 +128,3 @@ def update_food_category():
             db.session.flush()
     else:
         return jsonify(CommonResponse.failure("Could not find this food category")), 400
-
