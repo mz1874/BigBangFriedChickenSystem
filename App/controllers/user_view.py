@@ -68,11 +68,10 @@ def add_user():
     username = request_data.get('username')
     password = request_data.get('password')
     role_id = request_data.get('role')
-    sex = request_data.get('sex')
     tel = request_data.get("telephone")
     email = request_data.get('email')
     address = request_data.get('address')
-    if not all([username, password, sex, address, role_id]):
+    if not all([username, password, email,tel, address, role_id]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
     else:
         role = RoleModel.query.filter_by(id =role_id).first()
@@ -81,7 +80,7 @@ def add_user():
         else:
             try:
                 cart = ShoppingCart()
-                user = UserModel(username=username, password=password, sex=sex, address=address, shopping_cart = cart, tel=tel, email=email)
+                user = UserModel(username=username, password=password, address=address, shopping_cart = cart, tel=tel, email=email)
                 user.user_roles.add(role)
                 db.session.add(user)
                 db.session.commit()

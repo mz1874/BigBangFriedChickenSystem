@@ -14,8 +14,9 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
-    sex = db.Column(db.Boolean, nullable=True)
     address = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    tel = db.Column(db.String(50),nullable=False)
     user_roles = db.relationship("RoleModel", backref='users', lazy='dynamic', secondary=db_user_roles)
     # 一对多
     orders  = db.relationship('OrderModel', backref='user', lazy=True)
