@@ -33,7 +33,8 @@ def login():
                 "id":user.id,
                 "userName":user.username,
                 "role":result,
-                "sex":user.sex,
+                "tel":user.tel,
+                "email":user.email,
                 "addresss":user.address
             }
             return jsonify(CommonResponse.success("Login successful", data=json))

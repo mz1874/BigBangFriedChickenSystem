@@ -102,7 +102,7 @@ def update_food_category():
     if category_id is None or category_name is None:
         return jsonify(CommonResponse.failure("categoryId or categoryName is empty")), 400
     food_category = FoodCategory.query.filter_by(id=category_id).first()
-    uf
+
     if food_category is not None :
         try:
             food_category.category_name = category_name
