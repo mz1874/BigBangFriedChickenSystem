@@ -73,7 +73,7 @@ def delete_item_on_shopping_cart():
 
 @shopping_cart_view.route("/shoppingCart/add", methods=['POST'])
 def add_item_to_shopping_cart():
-    cart = ShoppingCart.query.filter_by(user_id=current_user.id).first()
+    cart = ShoppingCart.query.filter_by(user_id=request.json.get("currentUserId")).first()
 
     if not cart:
         return jsonify(CommonResponse.failure("Could not find cart")), 404

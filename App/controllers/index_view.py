@@ -62,7 +62,6 @@ Logout function
 
 
 @home_view.route('/current_user', methods=['GET'])
-@requires_permission('admin')
 def current_user_info():
     if current_user.is_authenticated:
         user_id = current_user.get_id()
