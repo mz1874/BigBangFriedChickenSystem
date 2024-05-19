@@ -67,6 +67,27 @@ def addFeedback():
         return jsonify(CommonResponse.failure(message=str(e))), 500
 
 
+@feedback_view.route("/feedback/<int:feedback_id>", methods=["GET"])
+def get_feedback_by_id(feedback_id):
+    feedback = FeedbackModel.query.filter_by(id=feedback_id).first()
+    if feedback:
+        result = {
+            "id": feedback.id,
+            "name": feedback.name,
+            "email": feedback.email,
+            "category": feedback.category,
+            "visitType": feedback.visit_type,
+            "timeVisit": feedback.time_visit,
+            "dateVisit": feedback.date_visit,
+            "subject": feedback.subject,
+            "message": feedback.message,
+            "tel": feedback.tel
+        }
+        return jsonify(CommonResponse.success(result)), 200
+    else:
+        return jsonify(CommonResponse.failure("Feedback not found")), 404
+
+
 @feedback_view.route("/feedback/delete", methods=["POST"])
 def deleteFeedback():
     pass

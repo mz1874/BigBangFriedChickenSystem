@@ -62,32 +62,45 @@ def delete_user_by_id():
 @user_view.route('/register', methods=['POST'])
 def add_user():
     request_data = request.get_json()
-    # 检查请求数据是否为空
+    # Check if the request data is empty
     if not request_data:
         return jsonify(CommonResponse.failure(message="Request data is empty")), 400
+
     username = request_data.get('username')
     password = request_data.get('password')
     role_id = request_data.get('role')
     tel = request_data.get("telephone")
     email = request_data.get('email')
     address = request_data.get('address')
-    if not all([username, password, email,tel, address, role_id]):
+
+    # Ensure all required fields are provided
+    if not all([username, password, email, tel, address, role_id]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
-    else:
-        role = RoleModel.query.filter_by(id =role_id).first()
-        if role.role_name == "admin":
-            return jsonify(CommonResponse.failure("Invalid role_id"))
-        else:
-            try:
-                cart = ShoppingCart()
-                user = UserModel(username=username, password=password, address=address, shopping_cart = cart, tel=tel, email=email)
-                user.user_roles.add(role)
-                db.session.add(user)
-                db.session.commit()
-                return jsonify(CommonResponse.success(message="User added successfully")), 200
-            except Exception as e:
-                db.session.rollback()
-                return jsonify(CommonResponse.failure(message=str(e))), 500
+
+    # Fetch the role based on role_id
+    role = RoleModel.query.filter_by(id=role_id).first()
+    if not role or role.role_name == "admin":
+        return jsonify(CommonResponse.failure(message="Invalid role_id")), 400
+
+    try:
+        # Create new shopping cart and user
+        cart = ShoppingCart()
+        user = UserModel(username=username, password=password, address=address, shopping_cart=cart, tel=tel,
+                         email=email)
+
+        # Add the role to the user's roles
+        user.user_roles.append(role)
+
+        # Add the user to the session and commit
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify(CommonResponse.success(message="User added successfully")), 200
+
+    except Exception as e:
+        # Rollback the session in case of an error
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(message=str(e))), 500
 
 
 @user_view.route("/addRoleToUser", methods=["POST"])
