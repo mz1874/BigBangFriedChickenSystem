@@ -17,8 +17,10 @@ shopping_cart_view = Blueprint('shopping_cart', __name__)
 
 @shopping_cart_view.route("/shoppingCart/select", methods=['GET'])
 def show_shopping_cart():
-    user = current_user
-    cart = ShoppingCart.query.filter_by(user_id=user.id).first()
+    # user = current_user
+    # cart = ShoppingCart.query.filter_by(user_id=user.id).first()
+    userId = request.args.get("currentUserId")
+    cart = ShoppingCart.query.filter_by(user_id=userId).first()
     foods = cart.foods.order_by(db_shopping_cart_foods.c.created_at.desc()).all()
     shopping_dto_list = []
     # 使用聚合函数获取每个食物的数量
@@ -46,8 +48,7 @@ def show_shopping_cart():
 
 @shopping_cart_view.route("/shoppingCart/delete", methods=['POST'])
 def delete_item_on_shopping_cart():
-    cart = ShoppingCart.query.filter_by(user_id=current_user.id).first()
-
+    cart = ShoppingCart.query.filter_by(user_id=request.json.get("currentUser")).first()
     if not cart:
         return jsonify(CommonResponse.failure("could not find cart")), 404
 

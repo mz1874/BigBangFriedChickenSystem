@@ -5,8 +5,9 @@ from App.common.common_response import CommonResponse
 from App.models.food_model import FoodModel
 from App.models.user_model import UserModel
 from App.models.order_model import OrderModel
-from App.models.shopping_cart_model import db_shopping_cart_foods
 from App.extension import db
+from App.models.shopping_cart_model import db_shopping_cart_foods
+from App.models.order_model import db_order_foods
 
 order_view = Blueprint('order_view', __name__)
 
@@ -45,8 +46,8 @@ def select_food_by_order_id():
 
 @order_view.route("/order/order", methods=["POST"])
 def order():
-    user_id = current_user.id
-    user = UserModel.query.filter_by(id=user_id).first()
+    userId = request.json.get("userId")
+    user = UserModel.query.filter_by(id=userId).first()
     # 获取当前用户的购物车
     cart = user.shopping_cart
     # 用户要生成order 的食物id
@@ -68,20 +69,30 @@ def order():
         sum = 0
         for item in items:
             food = FoodModel.query.filter_by(id=item.food_id).first()
-            temp_foods.append(food)
             temp_price = item.quality * food.price
+            obj = {
+                "foodId": food.id,
+                "quantity": item.quality
+            }
+            temp_foods.append(obj)
             sum += temp_price
         order = OrderModel()
         order.order_time = datetime.utcnow()
-        order.user_id = user_id
+        order.user_id = userId
         order.status = 1
         order.total = sum
-        order.order_foods = temp_foods
+
         try:
             db.session.add(order)
             db.session.commit()
+
+            for item in temp_foods:
+                db.session.execute(
+                    db_order_foods.insert().values(order_id=order.id, food_id=item["foodId"], quality=item["quantity"]))
+                db.session.commit()
+            return jsonify(CommonResponse.success("Added"))
         except Exception as e:
             db.session.rollback()
             db.session.flush()
             return jsonify(CommonResponse.failure(message=str(e))), 500
-        return CommonResponse.success()
+        return jsonify(CommonResponse.success("error"))
