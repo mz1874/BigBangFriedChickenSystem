@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="@pi4.com" uuid="aa6fcff0-adc0-474a-8837-a3804391bcd2">
-      <driver-ref>mysql.8</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
-      <jdbc-url>jdbc:mysql://192.168.0.60:3306</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
     <data-source source="LOCAL" name="@bugcreator.org.cn" uuid="3a234dbf-a5fb-464e-b112-f540344e2599">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>

@@ -1,4 +1,6 @@
-from flask import Blueprint, request,jsonify
+from select import select
+
+from flask import Blueprint, request, jsonify
 from flask_login import current_user
 from datetime import datetime
 from App.common.common_response import CommonResponse
@@ -33,15 +35,40 @@ def select_food_by_order_id():
     order_id = request.args.get("orderId")
     if order_id is None:
         return CommonResponse.failure("orderId is required")
+
+    # 查询订单
     order = OrderModel.query.filter_by(id=order_id).first()
     if order is None:
         return CommonResponse.failure("orderId is invalid")
+
+    # 查询订单下的食物
     foods = order.order_foods
+
+    # 查询订单中的食物数量
+    items = db.session.query(
+        db_order_foods.c.order_id,
+        db_order_foods.c.food_id,
+        db_order_foods.c.quality,
+    ).filter(
+        db_order_foods.c.order_id == order_id
+    ).all()
+
+    items_dict = {item.food_id: item.quality for item in items}
+
     if foods is not None:
-        result = [{"id": food.id, "foodName": food.food_name, "price": food.price, "img": food.img} for food in foods]
-        return CommonResponse.success(result)
+        result = []
+        for food in foods:
+            food_data = {
+                "id": food.id,
+                "foodName": food.food_name,
+                "price": food.price,
+                "img": food.img,
+                "quantity": items_dict.get(food.id, 0)
+            }
+            result.append(food_data)
+        return jsonify(CommonResponse.success(result))
     else:
-        return CommonResponse.success()
+        return jsonify(CommonResponse.success([]))
 
 
 @order_view.route("/order/order", methods=["POST"])
