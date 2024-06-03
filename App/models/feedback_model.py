@@ -8,5 +8,5 @@ class FeedbackModel(db.Model):
     name = db.Column(db.String(60), nullable=False)
     email = db.Column(db.String(60), nullable=False)
     tel = db.Column(db.String(50), nullable=False)
-    ranting = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)
     message = db.Column(db.String(255), nullable=False)
