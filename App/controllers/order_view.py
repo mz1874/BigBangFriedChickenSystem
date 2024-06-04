@@ -2,7 +2,12 @@ from select import select
 
 from flask import Blueprint, request, jsonify
 from flask_login import current_user
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from sqlalchemy import and_
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import load_only, joinedload
+
 from App.common.common_response import CommonResponse
 from App.models.food_model import FoodModel
 from App.models.user_model import UserModel
@@ -12,6 +17,63 @@ from App.models.shopping_cart_model import db_shopping_cart_foods
 from App.models.order_model import db_order_foods
 
 order_view = Blueprint('order_view', __name__)
+
+
+@order_view.route("/order/page", methods=["GET"])
+def page():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('count', 20, type=int)
+    orderId = request.args.get('orderId', type=int)
+    startTime = request.args.get('startTime', type=str)
+    endTime = request.args.get('endTime', type=str)
+
+    query = OrderModel.query.options(joinedload(OrderModel.user).load_only(UserModel.username)).options(load_only(
+        OrderModel.id, OrderModel.order_time, OrderModel.total, OrderModel.status))
+
+    # 处理日期转换
+    if startTime and endTime:
+        try:
+            start_date = datetime.strptime(startTime, "%Y-%m-%d").date()
+            end_date = datetime.strptime(endTime, "%Y-%m-%d").date() + timedelta(days=1)
+        except ValueError:
+            return jsonify(CommonResponse.failure("Invalid date format. Please use 'YYYY-MM-DD'.")), 400
+        query = query.filter(OrderModel.order_time.between(start_date, end_date))
+
+    if orderId:
+        query = query.filter(OrderModel.id == orderId)
+
+    try:
+        # 分页查询
+        order_pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        orders = order_pagination.items
+        result = [
+            {
+                "id": order.id,
+                "orderTime": order.order_time.strftime('%Y-%m-%d %H:%M:%S'),
+                "total": order.total,
+                "status": order.status,
+                "username": order.user.username
+            } for order in orders
+        ]
+
+        # 构建包含分页信息的响应
+        pagination_info = {
+            "items": result,
+            "total": order_pagination.total,
+            "page": order_pagination.page,
+            "pages": order_pagination.pages,
+            "has_prev": order_pagination.has_prev,
+            "has_next": order_pagination.has_next,
+            "prev_num": order_pagination.prev_num if order_pagination.has_prev else None,
+            "next_num": order_pagination.next_num if order_pagination.has_next else None,
+        }
+
+        return jsonify(CommonResponse.success(pagination_info))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(str(e))), 500
+
 
 
 @order_view.route("/order/selectOrderByUserId", methods=["GET"])
