@@ -10,7 +10,15 @@ feedback_view = Blueprint('feedback', __name__)
 def feedback_page():
     page = request.args.get("page", 1, type=int)
     count = request.args.get("count", 20, type=int)
-    feedbacks_paginated = FeedbackModel.query.paginate(page=page, per_page=count, max_per_page=100, error_out=False)
+    name = request.args.get("name", None, type=str)
+
+    # 构建查询
+    query = FeedbackModel.query
+    if name:
+        query = query.filter(FeedbackModel.name.ilike(f'%{name}%'))
+
+    # 分页
+    feedbacks_paginated = query.paginate(page=page, per_page=count, max_per_page=100, error_out=False)
 
     if feedbacks_paginated.items:
         result = [{"id": feedback.id, "name": feedback.name, "email": feedback.email, "rating": feedback.rating,
