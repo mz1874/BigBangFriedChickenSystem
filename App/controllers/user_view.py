@@ -1,4 +1,6 @@
 from flask import Blueprint, jsonify, request
+from sqlalchemy import and_
+
 from App.common.decorators import requires_permission
 from App.extension import db
 from App.common.common_response import CommonResponse
@@ -16,7 +18,7 @@ def select_all_user():
     username = request.args.get('username')  # 获取查询参数中的用户名
 
     # 构建查询
-    query = UserModel.query.filter(UserModel.username != 'admin')
+    query = UserModel.query.filter(and_(UserModel.username != 'admin', UserModel.s_active == 1))
     if username:
         query = query.filter(UserModel.username == username)
 
@@ -72,8 +74,8 @@ def delete_user_by_id():
     request_data = request.get_json()
     user_id = request_data.get("user_id")
     user = UserModel.query.filter_by(id=user_id).first()
+    user.s_active = 0
     if user is not None:
-        db.session.delete(user)
         db.session.commit()
         return jsonify(CommonResponse.success(message="Delete successful"))
     else:
@@ -93,7 +95,6 @@ def add_user():
     tel = request_data.get("telephone")
     email = request_data.get('email')
     address = request_data.get('address')
-
     # Ensure all required fields are provided
     if not all([username, password, email, tel, address, role_id]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
@@ -107,7 +108,7 @@ def add_user():
         # Create new shopping cart and user
         cart = ShoppingCart()
         user = UserModel(username=username, password=password, address=address, shopping_cart=cart, tel=tel,
-                         email=email)
+                         email=email, s_active = 1)
 
         # Add the role to the user's roles
         user.user_roles.append(role)

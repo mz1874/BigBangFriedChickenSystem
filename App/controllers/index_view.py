@@ -20,7 +20,7 @@ def load_user(user_id):
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
-    user = UserModel.query.filter(UserModel.username == username).first()
+    user = UserModel.query.filter(UserModel.username == username, UserModel.s_active == 1).first()
     if user is None:
         return jsonify(CommonResponse.failure("Could not find your userName", data=None, status_code=500))
     else:

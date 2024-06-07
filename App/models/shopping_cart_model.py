@@ -13,6 +13,6 @@ db_shopping_cart_foods = db.Table(
 class ShoppingCart(db.Model):
     __tablename__ = 'tb_shopping_cart'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'), nullable=True)
     foods = db.relationship("FoodModel", secondary=db_shopping_cart_foods, lazy='dynamic',
                             backref="shopping_cart")
