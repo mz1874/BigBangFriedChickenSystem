@@ -9,13 +9,34 @@ from App.models.shopping_cart_model import ShoppingCart
 user_view = Blueprint('user_view', __name__)
 
 
-@user_view.route('/selectAllUser', methods=['GET'])
-@requires_permission("admin")
+@user_view.route('/user/page', methods=['GET'])
 def select_all_user():
-    users = UserModel.query.filter(UserModel.username != 'admin')
-    result = [{'id': user.id, 'userName': user.username, 'sex': user.sex, 'address': user.address} for user in users]
-    return jsonify(CommonResponse.success(result))
+    page = request.args.get('page', 1, type=int)  # 默认为第一页
+    per_page = request.args.get('per_page', 20, type=int)  # 每页显示数量，默认为10
+    username = request.args.get('username')  # 获取查询参数中的用户名
 
+    # 构建查询
+    query = UserModel.query.filter(UserModel.username != 'admin')
+    if username:
+        query = query.filter(UserModel.username == username)
+
+    # 分页处理
+    users = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    # 构建返回结果
+    response_data = {
+        'items': [{'id': user.id, 'userName': user.username, 'tel': user.tel, 'address': user.address} for user in users.items],
+        'total': users.total,
+        'page': page,
+        'per_page': per_page,
+        'pages': users.pages,
+        'has_prev': users.has_prev,
+        'has_next': users.has_next,
+        'prev_num': users.prev_num,
+        'next_num': users.next_num
+    }
+
+    return jsonify(CommonResponse.success(response_data))
 
 @user_view.route("/updateUser", methods=["PUT"])
 def update_user():
