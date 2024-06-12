@@ -26,6 +26,7 @@ def page():
     orderId = request.args.get('orderId', type=int)
     startTime = request.args.get('startTime', type=str)
     endTime = request.args.get('endTime', type=str)
+    status = request.args.get('status', type=int)
 
     query = OrderModel.query.options(joinedload(OrderModel.user).load_only(UserModel.username)).options(load_only(
         OrderModel.id, OrderModel.order_time, OrderModel.total, OrderModel.status))
@@ -41,6 +42,9 @@ def page():
 
     if orderId:
         query = query.filter(OrderModel.id == orderId)
+
+    if status is not None:
+        query = query.filter(OrderModel.status == status)
 
     try:
         # 分页查询
@@ -185,3 +189,27 @@ def order():
             db.session.flush()
             return jsonify(CommonResponse.failure(message=str(e))), 500
         return jsonify(CommonResponse.success("error"))
+
+
+@order_view.route("/order/updateStatus", methods=["POST"])
+def update_status():
+    order_id = request.json.get("orderId")
+    status = request.json.get("status")
+
+    if not order_id:
+        return jsonify(CommonResponse.failure("orderId is required")), 400
+
+    if status is None:
+        return jsonify(CommonResponse.failure("status is required")), 400
+
+    try:
+        order = OrderModel.query.filter_by(id=order_id).first()
+        if not order:
+            return jsonify(CommonResponse.failure("Order not found")), 404
+
+        order.status = status
+        db.session.commit()
+        return jsonify(CommonResponse.success("Order status updated successfully"))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(str(e))), 500
