@@ -17,6 +17,7 @@ class UserModel(db.Model):
     address = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), nullable=False)
     tel = db.Column(db.String(50),nullable=False)
+    brithDay = db.Column(db.String(50),nullable=False)
     s_active = db.Column(db.Integer, nullable=False, default=1)
     user_roles = db.relationship("RoleModel", backref='users', lazy='dynamic', secondary=db_user_roles)
     # 一对多

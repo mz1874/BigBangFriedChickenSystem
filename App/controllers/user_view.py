@@ -11,6 +11,27 @@ from App.models.shopping_cart_model import ShoppingCart
 user_view = Blueprint('user_view', __name__)
 
 
+@user_view.route('/user/selectUserById', methods=['GET'])
+def get_user_by_id():
+    user_id = request.args.get('userId')
+    try:
+        user = UserModel.query.filter_by(id=user_id).first()
+        if user:
+            user_data = {
+                'id': user.id,
+                'userName': user.username,
+                'tel': user.tel,
+                'address': user.address,
+                'birthDay': user.brithDay,
+                'email': user.email,
+            }
+            return jsonify(CommonResponse.success(user_data)), 200
+        else:
+            return jsonify(CommonResponse.failure(message="User not found")), 404
+    except Exception as e:
+        return jsonify(CommonResponse.failure(message=str(e))), 500
+
+
 @user_view.route('/user/page', methods=['GET'])
 def select_all_user():
     page = request.args.get('page', 1, type=int)  # 默认为第一页
@@ -27,7 +48,7 @@ def select_all_user():
 
     # 构建返回结果
     response_data = {
-        'items': [{'id': user.id, 'userName': user.username, 'tel': user.tel, 'address': user.address} for user in users.items],
+        'items': [{'id': user.id, 'userName': user.username, 'tel': user.tel, 'address': user.address, "birthDay":user.brithDay} for user in users.items],
         'total': users.total,
         'page': page,
         'per_page': per_page,
@@ -40,26 +61,28 @@ def select_all_user():
 
     return jsonify(CommonResponse.success(response_data))
 
-@user_view.route("/updateUser", methods=["PUT"])
+@user_view.route("/updateUser", methods=["POST"])
 def update_user():
     request_data = request.get_json()
     if not request_data:
         return jsonify(CommonResponse.failure(message="Request data is empty")), 400
 
     user_id = request_data.get("user_id")
-    username = request_data.get("username")
-    sex = request_data.get("sex")
+    tel = request_data.get("tel")
     address = request_data.get("address")
+    birthDay = request_data.get("birthDay")
+    email = request_data.get("email")
 
-    if not all([user_id, username, sex, address]):
+    if not all([user_id, tel,birthDay, email, address]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
 
     try:
         user = UserModel.query.filter_by(id=user_id).first()
         if user:
-            user.username = username
-            user.sex = sex
+            user.tel = tel
             user.address = address
+            user.brithDay = birthDay
+            user.email = email
             db.session.commit()
             return jsonify(CommonResponse.success(message="User updated successfully")), 200
         else:
@@ -95,8 +118,9 @@ def add_user():
     tel = request_data.get("telephone")
     email = request_data.get('email')
     address = request_data.get('address')
+    birthDay = request_data.get('birthDay')
     # Ensure all required fields are provided
-    if not all([username, password, email, tel, address, role_id]):
+    if not all([username, password, email, tel, address, role_id, birthDay]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
 
     # Fetch the role based on role_id
@@ -108,7 +132,7 @@ def add_user():
         # Create new shopping cart and user
         cart = ShoppingCart()
         user = UserModel(username=username, password=password, address=address, shopping_cart=cart, tel=tel,
-                         email=email, s_active = 1)
+                         email=email, s_active = 1, brithDay = birthDay)
 
         # Add the role to the user's roles
         user.user_roles.append(role)
