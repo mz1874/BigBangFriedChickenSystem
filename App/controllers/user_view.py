@@ -72,6 +72,7 @@ def update_user():
     address = request_data.get("address")
     birthDay = request_data.get("birthDay")
     email = request_data.get("email")
+    password = request_data.get("password")
 
     if not all([user_id, tel,birthDay, email, address]):
         return jsonify(CommonResponse.failure(message="All fields are required")), 400
@@ -83,6 +84,10 @@ def update_user():
             user.address = address
             user.brithDay = birthDay
             user.email = email
+            if password is not None:
+                user.password = password
+            else:
+                user.password = user.password
             db.session.commit()
             return jsonify(CommonResponse.success(message="User updated successfully")), 200
         else:
