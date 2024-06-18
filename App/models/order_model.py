@@ -13,4 +13,5 @@ class OrderModel(db.Model):
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'), nullable=False)
+    driver_id = db.Column(db.Integer)
     order_foods = db.relationship("FoodModel", backref='order', lazy='dynamic', secondary=db_order_foods)

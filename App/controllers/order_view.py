@@ -18,6 +18,84 @@ from App.models.order_model import db_order_foods
 
 order_view = Blueprint('order_view', __name__)
 
+@order_view.route("/order/byDriverId", methods=["GET"])
+def get_orders_by_driver_id():
+    driver_id = request.args.get("driverId", type=int)
+    status = request.args.get("status", type=int)
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 20, type=int)
+
+    if not driver_id:
+        return jsonify(CommonResponse.failure("driverId is required")), 400
+
+    try:
+        # 查询订单并关联用户信息
+        query = db.session.query(OrderModel, UserModel.username.label('user_name')) \
+            .join(UserModel, UserModel.id == OrderModel.user_id) \
+            .filter(OrderModel.driver_id == driver_id)
+
+        # 如果 status 参数存在，添加过滤条件
+        if status is not None:
+            query = query.filter(OrderModel.status == status)
+
+        # 分页查询
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        orders = pagination.items
+
+        if not orders:
+            return jsonify(CommonResponse.success([])), 200
+
+        result = [
+            {
+                "id": order.OrderModel.id,
+                "orderTime": order.OrderModel.order_time.strftime('%Y-%m-%d %H:%M:%S'),
+                "total": order.OrderModel.total,
+                "status": order.OrderModel.status,
+                "username": order.user_name
+            } for order in orders
+        ]
+
+        # 构建包含分页信息的响应
+        pagination_info = {
+            "items": result,
+            "total": pagination.total,
+            "page": pagination.page,
+            "pages": pagination.pages,
+            "has_prev": pagination.has_prev,
+            "has_next": pagination.has_next,
+            "prev_num": pagination.prev_num if pagination.has_prev else None,
+            "next_num": pagination.next_num if pagination.has_next else None,
+        }
+
+        return jsonify(CommonResponse.success(pagination_info)), 200
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(str(e))), 500
+
+
+@order_view.route("/order/assignDriver", methods=["POST"])
+def assign_driver():
+    order_id = request.json.get("orderId")
+    driver_id = request.json.get("driverId")
+
+    if not order_id:
+        return jsonify(CommonResponse.failure("orderId is required")), 400
+
+    if not driver_id:
+        return jsonify(CommonResponse.failure("driverId is required")), 400
+
+    try:
+        order = OrderModel.query.filter_by(id=order_id).first()
+        if not order:
+            return jsonify(CommonResponse.failure("Order not found")), 404
+        order.driver_id = driver_id
+        order.status = 3
+        db.session.commit()
+        return jsonify(CommonResponse.success("Driver assigned and order status updated successfully"))
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify(CommonResponse.failure(str(e))), 500
 
 @order_view.route("/order/page", methods=["GET"])
 def page():
