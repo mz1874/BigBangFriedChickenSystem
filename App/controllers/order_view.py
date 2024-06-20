@@ -261,6 +261,10 @@ def order():
                 db.session.execute(
                     db_order_foods.insert().values(order_id=order.id, food_id=item["foodId"], quality=item["quantity"]))
                 db.session.commit()
+
+                db.session.query(db_shopping_cart_foods).filter(
+                    db_shopping_cart_foods.c.shopping_cart_id == cart.id).delete()
+                db.session.commit()
             return jsonify(CommonResponse.success("Added"))
         except Exception as e:
             db.session.rollback()
