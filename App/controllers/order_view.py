@@ -135,7 +135,8 @@ def page():
                 "orderTime": order.order_time.strftime('%Y-%m-%d %H:%M:%S'),
                 "total": order.total,
                 "status": order.status,
-                "username": order.user.username
+                "username": order.user.username,
+                "isPickUp": order.isPickUp
             } for order in orders
         ]
 
@@ -165,7 +166,7 @@ def selectOrder():
     if user is not None:
         orders = user.orders
         if orders is not None:
-            result = [{"id": order.id, "orderTime": order.order_time, "total": order.total, "status": order.status} for
+            result = [{"id": order.id, "orderTime": order.order_time, "total": order.total, "status": order.status, "isPickUp":order.isPickUp} for
                       order in orders]
             return jsonify(CommonResponse.success(result))
         else:
@@ -223,6 +224,7 @@ def order():
     cart = user.shopping_cart
     # 用户要生成order 的食物id
     food_ids = request.json["food_ids"]
+    is_pick_up = request.json["pick_up"]
     if food_ids is None:
         return CommonResponse.failure("food_ids is required")
     # 找到中间表的数据
@@ -252,6 +254,7 @@ def order():
         order.user_id = userId
         order.status = 1
         order.total = sum
+        order.isPickUp =is_pick_up
 
         try:
             db.session.add(order)
@@ -286,10 +289,12 @@ def update_status():
 
     try:
         order = OrderModel.query.filter_by(id=order_id).first()
+        if True is order.isPickUp:
+            order.status = 4
+        else:
+            order.status = status
         if not order:
             return jsonify(CommonResponse.failure("Order not found")), 404
-
-        order.status = status
         db.session.commit()
         return jsonify(CommonResponse.success("Order status updated successfully"))
     except SQLAlchemyError as e:

@@ -15,3 +15,4 @@ class OrderModel(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('tb_user.id'), nullable=False)
     driver_id = db.Column(db.Integer)
     order_foods = db.relationship("FoodModel", backref='order', lazy='dynamic', secondary=db_order_foods)
+    isPickUp = db.Column(db.Boolean)
